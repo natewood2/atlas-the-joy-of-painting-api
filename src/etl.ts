@@ -29,7 +29,6 @@ async function loadData(filePath: string) {
 
   for (const record of records) {
     try {
-      // Insert episode
       const episodeResult = await pool.query(
         `INSERT INTO episodes (
           episode_number, title, season, episode, 
@@ -48,11 +47,9 @@ async function loadData(filePath: string) {
         ]
       );
 
-      // Parse colors array from string
       const colors = JSON.parse(record.colors.replace(/'/g, '"'));
       const colorCodes = JSON.parse(record.color_hex.replace(/'/g, '"'));
 
-      // Insert colors
       for (let i = 0; i < colors.length; i++) {
         const colorResult = await pool.query(
           `INSERT INTO colors (name, hex_code) 
@@ -63,7 +60,6 @@ async function loadData(filePath: string) {
           [colors[i].trim(), colorCodes[i]]
         );
 
-        // Link color to episode
         await pool.query(
           `INSERT INTO episode_colors (episode_id, color_id) 
            VALUES ($1, $2)

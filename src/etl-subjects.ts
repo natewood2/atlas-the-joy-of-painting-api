@@ -21,7 +21,7 @@ async function insertSubjectData(filePath: string) {
     }));
 
   for await (const record of parser) {
-    console.log('Processing record:', record); // Debug log
+    console.log('Processing record:', record);
 
     const episodeParts = record.EPISODE.match(/S(\d+)E(\d+)/);
     if (!episodeParts) {
@@ -38,25 +38,22 @@ async function insertSubjectData(filePath: string) {
       [season, episode]
     );
     
-    console.log('Episode found:', episodeResult.rows[0]); // Debug log
+    console.log('Episode found:', episodeResult.rows[0]);
 
     if (episodeResult.rows.length > 0) {
       const episodeId = episodeResult.rows[0].id;
       
-      // Process each subject column
       for (const [key, value] of Object.entries(record)) {
         if (value === '1' && key !== 'EPISODE' && key !== 'TITLE') {
           const subjectName = key.toLowerCase().replace(/_/g, ' ').replace(/^\*/, '');
           
-          console.log('Adding subject:', subjectName); // Debug log
+          console.log('Adding subject:', subjectName);
 
-          // Insert or get element
           const elementResult = await pool.query(
             'INSERT INTO elements (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
             [subjectName]
           );
 
-          // Create relationship
           await pool.query(
             'INSERT INTO episode_elements (episode_id, element_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
             [episodeId, elementResult.rows[0].id]
