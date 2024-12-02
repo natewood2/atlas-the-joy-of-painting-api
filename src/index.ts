@@ -75,12 +75,31 @@ const formatEpisodeOutput = (rows: any[]) => {
 app.get('/episodes', async (req, res) => {
   try {
     const filters: FilterOptions = {};
+    
+    // color parse
     if (req.query.colors) {
       filters.colors = Array.isArray(req.query.colors)
         ? req.query.colors.map(c => String(c))
         : [String(req.query.colors)];
     }
-    
+
+    // subject (not working 100%)
+    if (req.query.subjects) {
+      filters.subjects = Array.isArray(req.query.subjects)
+        ? req.query.subjects.map(s => String(s))
+        : [String(req.query.subjects)];
+    }
+
+    // months
+    if (req.query.months) {
+      filters.months = Array.isArray(req.query.months)
+        ? req.query.months.map(m => parseInt(String(m)))
+        : [parseInt(String(req.query.months))];
+    }
+
+    // matchAll
+    filters.matchAll = req.query.matchAll === 'true';
+
     const query = buildFilterQuery(filters);
     const result = await pool.query(query);
     
